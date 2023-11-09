@@ -1,9 +1,8 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
-require('dotenv').config()
 const express = require('express')
 const mongoose = require('mongoose')
-const { errors } = require('celebrate')
 // eslint-disable-next-line import/no-extraneous-dependencies
+const helmet = require('helmet')
+const { errors } = require('celebrate')
 const cors = require('cors')
 
 const corseAllowedOrigins = [
@@ -12,16 +11,11 @@ const corseAllowedOrigins = [
   'https://kme.nomoredomainsrocks.ru',
 ]
 
-const usersRouter = require('./routes/users')
-const loginUser = require('./routes/signin')
-const createUser = require('./routes/signup')
-const moviesRouter = require('./routes/movies')
-const auth = require('./middlewares/auth')
 const { requestLogger, errorLogger } = require('./middlewares/logger')
-const { NotFoundError, handleErrors } = require('./utils/errors')
-
-// Слушаем 3000 порт
-const { PORT = 3000, DB_URL = 'mongodb://127.0.0.1:27017/bitfilmsdb' } = process.env
+const rateLimiter = require('./middlewares/limiter')
+const { handleErrors } = require('./utils/errors')
+const router = require('./routes')
+const { PORT, DB_URL } = require('./utils/production')
 
 // подключаемся к серверу mongo
 mongoose.connect(DB_URL, {
@@ -37,26 +31,15 @@ app.use(cors({
   credentials: true,
 }))
 
+app.use(rateLimiter)
+app.use(helmet())
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
 app.use(requestLogger) // подключаем логгер запросов
-
-// за ним идут все обработчики роутов
-app.use('/signin', loginUser)
-app.use('/signup', createUser)
-app.use(auth)
-app.use('/users', usersRouter)
-app.use('/movies', moviesRouter)
-// eslint-disable-next-line no-unused-vars
-app.use('*', (req, res) => {
-  const isPageNotFoundError = 'Запрашиваемая страница не найдена'
-  throw new NotFoundError(isPageNotFoundError)
-})
-
+app.use(router) // за ним идут все обработчики роутов
 app.use(errorLogger) // подключаем логгер ошибок
-
 app.use(errors()) // обработчик ошибок celebrate
 app.use(handleErrors) // централизованный обработчик ошибок
 
-app.listen(PORT)
+app.listen(PORT) // Слушаем порт

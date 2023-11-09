@@ -1,14 +1,11 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
-require('dotenv').config()
-/* eslint-disable no-console */
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const { constants } = require('http2')
 const { Promise } = require('mongoose')
 const User = require('../models/user')
 const { UnauthorizedError, NotFoundError, ConflictingRequestError } = require('../utils/errors')
+const { JWT_SECRET } = require('../utils/production')
 
-const { NODE_ENV, JWT_SECRET } = process.env
 const isWrongEmailOrPassword = 'Неправильные почта или пароль'
 
 // eslint-disable-next-line consistent-return
@@ -65,7 +62,7 @@ const loginUser = async (req, res, next) => {
     const user = await User.findUserByCredentials(email, password)
     const token = jwt.sign(
       { _id: user._id },
-      NODE_ENV === 'production' ? JWT_SECRET : 'dev-secretkey',
+      JWT_SECRET,
       // { expiresIn: '7d' },
     )
     res.status(constants.HTTP_STATUS_OK).send({ token })
