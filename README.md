@@ -37,6 +37,6 @@
 
 <div align="right">
   <p align="right">
-    <img src="https://api.visitorbadge.io/api/visitors?path=https%3A%2F%2Fgithub.com%2Fkkirillovv%2Freact-mesto-api-full-gha-cookie&countColor=%23f0b354" alt="Visitors Badge" />
+    <img src="https://api.visitorbadge.io/api/visitors?path=https%3A%2F%2Fgithub.com%2Fkkirillovv%2Fmovies-explorer-api&countColor=%23f0b354" alt="Visitors Badge" />
   </p>
 </div>
